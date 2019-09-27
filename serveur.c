@@ -83,12 +83,18 @@ int main() {
     // ================================== TRAITEMENT DES DONNEES RECUES  ======================================= 
      
     tcli = sizeof addrClient;
+    // nettoyer le buffer
+    memset(buffer, 0, sizeof buffer);
+
     while(1) {
+        printf("En attente de reception d'un message ...\n");
         if ((tailleDonnees = recvfrom(soc, buffer, bufferMAX-1 , 0, (struct sockaddr *)&addrClient, &tcli)) == -1) {
             perror("recvfrom");
             exit(1);
         }    
+        printf("J'ai reçue : %s \n",buffer); 
+        // nettoyer le buffer pour la prochaine reception
+        memset(buffer, 0, sizeof buffer);
     }
-    printf("%s\n",buffer); 
     
 }
