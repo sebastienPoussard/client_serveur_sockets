@@ -56,3 +56,9 @@ dkms.conf
 *.c~
 
 client/Makefile~
+
+client
+
+serveur
+
+Makefile~
