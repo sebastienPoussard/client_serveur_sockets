@@ -1,33 +1,51 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/types.h>        
 #include <sys/socket.h>
+#include "lib.h"
 
 
 int main (){
+	int bufferMAX = 500;
 	char adresse[50];
-	int port;
-	struct addrinfo adresse_serveur, *res, *p;
-	struct sockaddr_storage serveur;
+	char msg[bufferMAX];
+	char port[5];
+	int socket_envoie;
+	int socket_ecoute;
+	int tailleDonnees; 
+	int tserveur;                           
+	struct sockaddr_storage addrServeur; 
 
 
 	printf("Adresse du serveur :");
 	scanf("%s", adresse);
 
 	printf("Port du serveur :");
-	scanf("%d", &port);
+	scanf("%s", port);
 
-	memset(&adresse_serveur, 0, sizeof(struct addrinfo));
-	adresse_serveur.ai_family=AF_UNSPEC;
-	adresse_serveur.ai_socktype=SOCK_DGRAM;
+	printf("message a envoyer au serveur :");
+	scanf("%s", msg);
 
-	if((getaddrinfo(adresse, port, &adresse_serveur, &res))!=0){
-		printf("Erreur getaddrinfo");
-		return 0;
+	socket_envoie = creationSocketDgram(adresse, port);
+
+	// envoi de données au serveur
+	int numbytes;
+	if ((numbytes = sendto(socket_envoie, msg, strlen(msg), 0, adresse, port)) == -1) {
+		perror("talker: sendto");
+		exit(1);
 	}
 
+	socket_ecoute = creationSocketDgram(NULL, port);
+	// nettoyer le buffer
+	memset(msg, 0, sizeof msg);
+	while(1) {
+		printf("En attente de reception d'un message ...\n");
+		if ((tailleDonnees = recvfrom(socket_ecoute, msg, bufferMAX-1 , 0, (struct sockaddr *)&addrServeur, &tserveur)) == -1) {
+			perror("recvfrom");
+			exit(1);
+		}
 
-
-		
-
+	}
+	printf("Message reçue : %s", msg);
 }
