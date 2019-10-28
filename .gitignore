@@ -62,3 +62,7 @@ client
 serveur
 
 Makefile~
+
+*.swo
+
+vimrc

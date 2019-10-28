@@ -1,9 +1,13 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <sys/types.h>        
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
 #include <sys/socket.h>
-#include "lib.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 
 int main (){
@@ -11,12 +15,11 @@ int main (){
 	char adresse[50];
 	char msg[bufferMAX];
 	char port[5];
-	int socket_envoie;
-	int socket_ecoute;
-	int tailleDonnees; 
-	int tserveur;                           
-	struct sockaddr_storage addrServeur; 
-
+	int socket_envoie, socket_ecoute;
+	struct addrinfo hints, *servinfo, *p;
+	struct sockaddr_storage addrServeur;
+	int rv;
+	int numbytes;
 
 	printf("Adresse du serveur :");
 	scanf("%s", adresse);
@@ -27,25 +30,77 @@ int main (){
 	printf("message a envoyer au serveur :");
 	scanf("%s", msg);
 
-	socket_envoie = creationSocketDgram(adresse, port);
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
 
-	// envoi de données au serveur
-	int numbytes;
-	if ((numbytes = sendto(socket_envoie, msg, strlen(msg), 0, adresse, port)) == -1) {
+	if ((rv = getaddrinfo(adresse, port, &hints, &servinfo)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", strerror(rv));
+		return 1;
+	}
+
+	for(p = servinfo; p != NULL; p = p->ai_next) {
+		if ((socket_envoie = socket(p->ai_family, p->ai_socktype,
+						p->ai_protocol)) == -1) {
+			perror("talker: socket");
+			continue;
+		}
+
+		break;
+	}
+
+	if (p == NULL) {
+		fprintf(stderr, "talker: failed to create socket\n");
+		return 2;
+	}
+
+	if ((numbytes = sendto(socket_envoie, msg, strlen(msg), 0,
+					p->ai_addr, p->ai_addrlen)) == -1) {
 		perror("talker: sendto");
 		exit(1);
 	}
 
-	socket_ecoute = creationSocketDgram(NULL, port);
-	// nettoyer le buffer
-	memset(msg, 0, sizeof msg);
-	while(1) {
-		printf("En attente de reception d'un message ...\n");
-		if ((tailleDonnees = recvfrom(socket_ecoute, msg, bufferMAX-1 , 0, (struct sockaddr *)&addrServeur, &tserveur)) == -1) {
-			perror("recvfrom");
-			exit(1);
+	freeaddrinfo(servinfo);
+
+	close(socket_envoie);
+
+	//reception
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+
+	if ((rv = getaddrinfo(adresse, port, &hints, &servinfo)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", strerror(rv));
+		return 1;
+	}
+
+	for(p = servinfo; p != NULL; p = p->ai_next) {
+		if ((socket_envoie = socket(p->ai_family, p->ai_socktype,
+						p->ai_protocol)) == -1) {
+			perror("talker: socket");
+			continue;
 		}
 
+		break;
 	}
-	printf("Message reçue : %s", msg);
+
+	if (p == NULL) {
+		fprintf(stderr, "talker: failed to create socket\n");
+		return 2;
+	}
+
+	getnameinfo(&addrServeur, sizeof addrServeur, adresse, sizeof adresse, port, sizeof port, 0);
+
+	if ((numbytes = recvfrom(socket_ecoute, msg, bufferMAX-1 , 0,
+					(struct sockaddr *)&addrServeur, sizeof(addrServeur))) == -1) {
+		perror("recvfrom");
+		exit(1);
+	}	
+
+	freeaddrinfo(servinfo);
+
+	close(socket_envoie);
+
+
+	return 0;
 }
