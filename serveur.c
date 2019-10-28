@@ -47,32 +47,36 @@ int main() {
 
     // ================================== TRAITEMENT DES DONNEES RECUES  ======================================= 
     // création de le socket d'écoute
-    socEcoute = creationSocketDgram(NULL,port);
+    socEcoute = socDgramEcoute(port);
     tcli = sizeof addrClient;
     // nettoyer le buffer
     memset(buffer, 0, sizeof buffer);
     while(1) {
         printf("En attente de reception d'un message ...\n");
-        if ((tailleDonnees = recvfrom(socEcoute, buffer, bufferMAX-1 , 0, (struct sockaddr *)&addrClient, &tcli)) == -1) {
+        if ((tailleDonnees = recvfrom(socEcoute, buffer, bufferMAX-1 , 0,(struct sockaddr *)&addrClient, &tcli)) == -1) {
             perror("recvfrom");
             exit(1);
         }    
         // récuperer l'ip du client et le port du client
-        getnameinfo(&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, 0);
+        getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, 0);
         printf("Message reçue de ");
         printf(BLU "%s:%s",ipClient,service);
         printf(RESET " --> ");
         printf(MAG "%s\n" RESET,buffer);
         // création d'une socket dgram pour répondre au client
-        socRep = creationSocketDgram(ipClient,service);
+        //socRep = creationSocketDgram(ipClient,service);
         // envoi de données au client
-        int numbytes;
-        if ((numbytes = sendto(socRep, buffer, strlen(buffer), 0, ipClient, service)) == -1) {
-            perror("talker: sendto");
-            exit(1);
-        }
+        //if (addrClient.ss_family == AF_INET) {
+        //    printf("tototot\n");
+        //}
+        //if ((numbytes = sendto(socRep, buffer, strlen(buffer), 0, ipClient, atoi(service))) == -1) {
+        //    perror("talker: sendto");
+        //    exit(1);
+        //}
+        socDgramEnvoie(addrClient, service, buffer);
         // nettoyer le buffer pour la prochaine reception
         memset(buffer, 0, sizeof buffer);
+        
     }
     
 }
