@@ -10,6 +10,15 @@
 #include <netdb.h>
 #include "lib.h"
 
+void viderBuffer()
+{
+    int c = 0;
+    while (c != '\n' && c != EOF)
+    {
+        c = getchar();
+    }
+}
+
 
 int main (){
 	int bufferMAX = 500;
@@ -24,12 +33,15 @@ int main (){
 
 	printf("Adresse du serveur :");
 	scanf("%s", adresse);
+	viderBuffer();
 
 	printf("Port du serveur :");
 	scanf("%s", port);
+	viderBuffer();
 
 	printf("message a envoyer au serveur :");
-	scanf("%s", msg);
+	scanf("%[^\n]", msg);
+	viderBuffer();
 
 	socket_envoie = socDgramEnvoie(adresse, port, msg);
 
