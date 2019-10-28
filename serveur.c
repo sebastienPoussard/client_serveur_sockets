@@ -58,25 +58,16 @@ int main() {
             exit(1);
         }    
         // récuperer l'ip du client et le port du client
-        getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, 0);
+        getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, NI_NUMERICHOST);
         printf("Message reçue de ");
         printf(BLU "%s:%s",ipClient,service);
         printf(RESET " --> ");
         printf(MAG "%s\n" RESET,buffer);
-        // création d'une socket dgram pour répondre au client
-        //socRep = creationSocketDgram(ipClient,service);
-        // envoi de données au client
-        //if (addrClient.ss_family == AF_INET) {
-        //    printf("tototot\n");
-        //}
-        //if ((numbytes = sendto(socRep, buffer, strlen(buffer), 0, ipClient, atoi(service))) == -1) {
-        //    perror("talker: sendto");
-        //    exit(1);
-        //}
-        socDgramEnvoie(addrClient, service, buffer);
+        // envoyer la reponse au client
+        char c[5] = "8181";
+        char b[] = "127.0.0.1";
+        socDgramEnvoie(b, c, buffer);
         // nettoyer le buffer pour la prochaine reception
         memset(buffer, 0, sizeof buffer);
-        
     }
-    
 }
