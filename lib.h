@@ -8,3 +8,7 @@ int socDgramEcoute(char port[5]) ;
 // la fonction renvoie 0 en cas de succès
 int socDgramEnvoie(char adresse[50], char port[5], char message[1024]); 
 
+// cette fonction crée une socket STREAM (TCP)
+// prend en parametre le port à ouvrir 
+// renvoie le pointeur vers la socket
+int socStreamRdv(char port[5]); 
