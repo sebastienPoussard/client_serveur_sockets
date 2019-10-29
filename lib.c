@@ -154,7 +154,7 @@ int socStreamRdv(char port[5]) {
     hints.ai_socktype = SOCK_STREAM;    // mode STREAM
     hints.ai_flags = AI_PASSIVE;        // écoute sur toute les interfaces, remplis automatiquement par mes IP
  
-    printf("DEBUG : Construction socket TCP RDV\n");
+    printf("DEBUG : Construction socket TCP RDV sur %s\n",port);
     // passer les parametres à getaddrinfo pour autocomplétion du reste
     if ((status = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
@@ -174,6 +174,12 @@ int socStreamRdv(char port[5]) {
         if (setsockopt(soc, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
             perror("Echec à la modification des options de la socket");
             exit(1);
+        }
+        // associer la socket au port (stocké dans la structure renvoyé par getaddrinfo)
+        if (bind(soc, p->ai_addr, p->ai_addrlen) == -1) {
+            close(soc);
+            perror("Erreur de bind() à l'association du port à la socket.");
+            continue;
         }
         break;
     }

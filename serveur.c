@@ -22,6 +22,7 @@
 #define WHT   "\x1B[37m"
 #define RESET "\x1B[0m"
 
+
 int main() {
 
     // ==================================== VARIABLES ====================================================
@@ -38,6 +39,7 @@ int main() {
     int bufferMAX = 1024;               // taille max du buffer
     char buffer[bufferMAX];             // buffer permettant de stocker les données
     int choix;                          // choix si le serveur est ouvert en TCP ou UDP
+    int backlog = 50;                   // nombre de connexions qui peuvent être dans la queue en TCP
     
     
     // afficher message de bienvenue et demander si l'utilisateur souhaite ouvrir un port TCP ou UDP 
@@ -61,7 +63,7 @@ int main() {
         printf("Ouverture du port %s UDP en écoute... \n",port);
         // ================================== TRAITEMENT DES DONNEES RECUES  ======================================= 
         // création de le socket d'écoute
-        socEcoute =  socDgramEcoute(port);
+        socEcoute = socDgramEcoute(port);
         tcli = sizeof addrClient;
         // nettoyer le buffer
         memset(buffer, 0, sizeof buffer);
@@ -83,9 +85,59 @@ int main() {
             memset(buffer, 0, sizeof buffer);
         }
     } else {
-    // l'utilisateur ouvre un port en TCP
-
+        // l'utilisateur ouvre un port en TCP
         printf("Ouverture du port %s TCP en écoute... \n",port);
+        // ouvrir la socket TCP de rendez vous
+        socRdv = socStreamRdv(port); 
+
+        // la socket de rendez vous écoute les nouvelles connexions
+        if (listen(socRdv, backlog) == -1) {
+            perror("erreur de la socket de rendez vous à listen");
+            exit(1);
+        }
+        
+        printf("En attente d'une connexion...\n");
+        // attendre les connexions
+        while(1) {
+            // accpeter une nouvelle connexion
+            tcli = sizeof addrClient;
+            socCom = accept(socRdv, (struct sockaddr *)&addrClient, &tcli);
+            if (socCom == -1) {
+                perror("Erreur à l'acceptation d'une nouvelle connexion TCP");
+                continue;
+            }
+            // récuperer l'ip du client et le port du client
+            getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, NI_NUMERICHOST);
+            printf(YEL "Nouvelle connexion TCP de ");
+            printf(BLU "%s:%s",ipClient,service);
+            printf(MAG "\n" RESET,buffer);
+
+            // faire un fork pour traiter la connexion du client
+            if (!fork()) { 
+                // traitement de la connexion, échange de données
+                // le fils n'as pas besoin de la socket de rdv
+                close(socRdv);
+                // boucle de reception de messages
+                while(1) {
+                    // nettoyer le buffer
+                    memset(buffer, 0, sizeof buffer);
+                    // reception du message
+                    if ((tailleDonnees = recv(socCom, buffer, bufferMAX-1, 0)) == -1) {
+                        perror("erreur à la recpetion du message");
+                        exit(1);
+                    }              
+                    // envoie d'une réponse au client
+                    if (send(socCom, buffer, bufferMAX-1, 0) == -1) {
+                        perror("erreur à l'envoie de la reponse au client");
+                    }
+                }
+                // fermeture de la socket de communication
+                close(socRdv);
+                exit(0);
+            }
+            // processus parent ferme la socket d'échange de données
+            close(socCom);
+        }
     }   
 }
 
