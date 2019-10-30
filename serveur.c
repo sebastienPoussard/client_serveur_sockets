@@ -32,6 +32,7 @@ int main() {
     int socRdv;                         // descripteur de socket de rendez vous TCP
     int socCom;                         // descripteur de socjet de communication TCP
     char ipClient[1024];                // adresse IP du client
+    char hostClient[1024];              // hostname du client
     char service[20];                   // service correspond au port utilisé (peut être nommé ex: HTTPS pour 443)
     int tailleDonnees;                  // taille de données reçues
     int tcli;                           // taille de la structure du client qui envoie des données
@@ -72,10 +73,13 @@ int main() {
                 perror("recvfrom");
                 exit(1);
             }    
-            // récuperer l'ip du client et le port du client
+            // récuperer le hostname
+            getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, hostClient, sizeof hostClient, service, sizeof service, 0);
+            // récuperer l'ip client et son port
             getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, NI_NUMERICHOST);
+
             printf("Message reçue de ");
-            printf(BLU "%s:%s",ipClient,service);
+            printf(BLU "%s:%s",hostClient,service);
             printf(RESET " --> ");
             printf(MAG "%s\n" RESET,buffer);
             // envoyer la reponse au client
@@ -107,8 +111,11 @@ int main() {
                 continue;
             }
             printf(YEL "Nouvelle connexion TCP !\n" RESET);
-            // récuperer l'ip du client et le port du client
-            getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, NI_NUMERICHOST);
+            // récuperer le hostname du client
+            getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, hostClient, sizeof hostClient, service, sizeof service, NI_NUMERICHOST);
+            // récuperer l'ip du client et son port
+            getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, 0);
+
 
             // faire un fork pour traiter la connexion du client
             if (!fork()) { 
