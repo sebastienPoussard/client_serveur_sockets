@@ -51,18 +51,25 @@ int main (){
 	//on selectionne le type de communication
 	switch (choix) {
 		case 1:
+			//creation socket stream 
 			socket = socStream(adresse, port);
+
+			//envoie msg
 			envoieMsgStr(socket, msg);
 
+			//reception msg
 			recepMsgStr(socket);
 
 			close(socket);
 			break;
 		case 2:
-			//on cree une socket d'envoie DGRAM et envoie le msg
+			//on cree une socket d'envoie DGRAM 
 			socket = socDgram(adresse, port);
+
+			//envoie msg
 			envoieMsgDgram(socket, msg);
 
+			//reception msg
 			recepMsgDgram(socket);
 
 			close(socket);

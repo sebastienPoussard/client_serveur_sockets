@@ -85,6 +85,7 @@ int socDgram(char adresse[50], char port[5]) {
 int envoieMsgDgram(int soc, char message[bufferMAX]){
 	int numbytes;	// compteur de bits envoyés
 
+	//envoie du message
 	if ((numbytes = sendto(soc, message, strlen(message), 0, p->ai_addr, p->ai_addrlen)) == -1) {
 		perror("talker: sendto");
 		exit(1);
@@ -99,6 +100,7 @@ int recepMsgDgram(int socEcoute){
 	int tcli;                           	// taille de la structure du client qui envoie des données
 	struct sockaddr_storage addrClient; 	// structure qui contient les informations du client
 
+	//recepetion du msg et affichage 
 	printf("En attente de reception d'un message ...\n");
 	if ((tailleDonnees = recvfrom(socEcoute, buffer, bufferMAX-1 , 0,(struct sockaddr *)&addrClient,(socklen_t *)&tcli)) == -1) {
 		perror("recvfrom");
@@ -171,19 +173,23 @@ int socStreamRdv(char port[5]) {
 
 //creation socket stream
 int socStream(char adresse[50], char port[5]){
-	int soc;  
-	struct addrinfo hints, *servinfo, *p;
-	int ecode;
+	int soc; 				//socket Stream utilise 
+	struct addrinfo hints, *servinfo;	//structures qui contiennent des infos ip, af etc.
+	int ecode;				//erreur code
 
+	//on rentre les premieres informations
 	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_family = AF_UNSPEC; //IPv4 ou IPv6
+	hints.ai_socktype = SOCK_STREAM; //socket stream = tcp
 
+	//on recupere les infos de la machine a contacter
 	if ((ecode = getaddrinfo(adresse, port, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", strerror(ecode));
 		return 1;
 	}
 
+	// chercher dans la liste chainée de résultats retournés par getaddrinfo une structure addrinfo correcte
+	// et l'associer à une nouvelle socket "soc"
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((soc = socket(p->ai_family, p->ai_socktype,
 						p->ai_protocol)) == -1) {
@@ -200,25 +206,29 @@ int socStream(char adresse[50], char port[5]){
 		break;
 	}
 
+	// verifier que on à réussis à trouver une structure addrinfo correcte dans la liste retourné par getaddrinfo
 	if (p == NULL) {
 		fprintf(stderr, "client: failed to connect\n");
 		return 2;
 	}
 
-	freeaddrinfo(servinfo); // all done with this structure
+	//libere la structure
+	freeaddrinfo(servinfo); 
 	return soc;
 }
 
 //recoit un msg depuis le serveur en STREAM
 int recepMsgStr(int soc){
-	int numbytes;
-	char buffer[bufferMAX];
+	int numbytes;		//compteur de bits envoyés
+	char buffer[bufferMAX];	//msg recu
 
+	//reception du msg stream
 	if ((numbytes = recv(soc, buffer, bufferMAX-1, 0)) == -1) {
 		perror("recv");
 		exit(1);
 	}
 
+	//affichage du msg
 	printf("client: received '%s'\n",buffer);
 
 	return 0;
@@ -226,8 +236,9 @@ int recepMsgStr(int soc){
 
 //envoie un msg au serveur en STREAM
 int envoieMsgStr(int soc, char msg[bufferMAX]){
-	int numbytes;   // compteur de bits envoyés
+	int numbytes;   	// compteur de bits envoyés
 
+	//envoie msg stream
 	if ((numbytes = send(soc, msg, strlen(msg), 0)) == -1) {
 		perror("talker: sendto");
 		exit(1);
