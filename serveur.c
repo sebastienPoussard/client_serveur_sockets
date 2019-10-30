@@ -99,19 +99,16 @@ int main() {
         printf("En attente d'une connexion...\n");
         // attendre les connexions
         while(1) {
-            // accpeter une nouvelle connexion
+            // accepter une nouvelle connexion
             tcli = sizeof addrClient;
             socCom = accept(socRdv, (struct sockaddr *)&addrClient, &tcli);
             if (socCom == -1) {
                 perror("Erreur à l'acceptation d'une nouvelle connexion TCP");
                 continue;
             }
+            printf(YEL "Nouvelle connexion TCP !\n" RESET);
             // récuperer l'ip du client et le port du client
             getnameinfo((struct sockaddr *)&addrClient, sizeof addrClient, ipClient, sizeof ipClient, service, sizeof service, NI_NUMERICHOST);
-            printf(YEL "Nouvelle connexion TCP de ");
-            printf(BLU "%s:%s",ipClient,service);
-            printf(MAG "\n" RESET,buffer);
-
 
             // faire un fork pour traiter la connexion du client
             if (!fork()) { 
@@ -124,9 +121,15 @@ int main() {
                     memset(buffer, 0, sizeof buffer);
                     // reception du message
                     if ((tailleDonnees = recv(socCom, buffer, bufferMAX-1, 0)) == -1) {
-                        perror("erreur à la recpetion du message");
+                        perror("erreur à la reception du message");
                         exit(1);
                     }              
+                    // afficher les donées reçues
+                    printf("Message reçue de ");
+                    printf(BLU "%s:%s",ipClient,service);
+                    printf(RESET " --> ");
+                    printf(MAG "%s\n" RESET,buffer);
+
                     // envoie d'une réponse au client
                     if (send(socCom, buffer, bufferMAX-1, 0) == -1) {
                         perror("erreur à l'envoie de la reponse au client");

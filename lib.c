@@ -241,7 +241,8 @@ int recepMsgStr(int soc){
 	}
 
 	//affichage du msg
-	printf("client: received '%s'\n",buffer);
+	printf("Le serveur répond :");
+    printf(MAG " '%s'\n" RESET,buffer);
 
 	return 0;
 }
