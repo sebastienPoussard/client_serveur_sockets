@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include "lib.h"
 
+//fonction qui vide le buffer
 void viderBuffer()
 {
     int c = 0;
@@ -21,34 +22,53 @@ void viderBuffer()
 
 
 int main (){
-	int bufferMAX = 500;
-	char adresse[50];
-	char msg[bufferMAX];
-	char port[5];
-	int socket_envoie, socket_ecoute;
-	struct addrinfo hints, *servinfo, *p;
-	struct sockaddr_storage addrServeur;
-	int rv;
-	int numbytes;
+	char adresse[50];			//adresse du serveur
+	char msg[bufferMAX];			//message a envoye au serveur
+	char port[5];				//port sur lequel envoyer et ecouter
+	int choix;				//choix de communication
+	int socket; 				//socket de communication 
 
+	//on recupere l'adresse du serveur
 	printf("Adresse du serveur :");
 	scanf("%s", adresse);
 	viderBuffer();
 
+	//on recupere le port du serveur
 	printf("Port du serveur :");
 	scanf("%s", port);
 	viderBuffer();
 
+	//on recupere le msg a envoyer
 	printf("message a envoyer au serveur :");
 	scanf("%[^\n]", msg);
 	viderBuffer();
 
-	socket_envoie = socDgramEnvoie(adresse, port);
-	envoieMsgDgram(socket_envoie, msg);
+	//on selectionne le protocole de transport
+	printf("Quel type de communication souhaitez-vous utiliser ?\n");
+	printf("1 : TCP\n2 : UDP\n");
+	scanf("%i", &choix);
 
-	//reception
-	socket_ecoute = socDgramEcoute(port);
-	recepMsgDgram(socket_ecoute);
+	//on selectionne le type de communication
+	switch (choix) {
+		case 1:
+			socket = socStream(adresse, port);
+			envoieMsgStr(socket, msg);
+
+			recepMsgStr(socket);
+
+			close(socket);
+			break;
+		case 2:
+			//on cree une socket d'envoie DGRAM et envoie le msg
+			socket = socDgram(adresse, port);
+			envoieMsgDgram(socket, msg);
+
+			recepMsgDgram(socket);
+
+			close(socket);
+			break;
+	}
+	
 	return 0;
 }
 	

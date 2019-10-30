@@ -36,7 +36,6 @@ int main() {
     int tailleDonnees;                  // taille de données reçues
     int tcli;                           // taille de la structure du client qui envoie des données
     struct sockaddr_storage addrClient; // structure qui contient les informations du client
-    int bufferMAX = 1024;               // taille max du buffer
     char buffer[bufferMAX];             // buffer permettant de stocker les données
     int choix;                          // choix si le serveur est ouvert en TCP ou UDP
     int backlog = 50;                   // nombre de connexions qui peuvent être dans la queue en TCP
@@ -63,7 +62,7 @@ int main() {
         printf("Ouverture du port %s UDP en écoute... \n",port);
         // ================================== TRAITEMENT DES DONNEES RECUES  ======================================= 
         // création de le socket d'écoute
-        socEcoute = socDgramEcoute(port);
+        socEcoute = socDgram(NULL, port);
         tcli = sizeof addrClient;
         // nettoyer le buffer
         memset(buffer, 0, sizeof buffer);
@@ -80,7 +79,7 @@ int main() {
             printf(RESET " --> ");
             printf(MAG "%s\n" RESET,buffer);
             // envoyer la reponse au client
-            socRep = socDgramEnvoie(ipClient, service);
+            socRep = socDgram(ipClient, service);
             envoieMsgDgram(socRep, buffer);
             // nettoyer le buffer pour la prochaine reception
             memset(buffer, 0, sizeof buffer);
@@ -112,6 +111,7 @@ int main() {
             printf(YEL "Nouvelle connexion TCP de ");
             printf(BLU "%s:%s",ipClient,service);
             printf(MAG "\n" RESET,buffer);
+
 
             // faire un fork pour traiter la connexion du client
             if (!fork()) { 
