@@ -38,37 +38,57 @@ int main (){
 	scanf("%s", port);
 	viderBuffer();
 
-	//on recupere le msg a envoyer
-	printf("message a envoyer au serveur :");
-	scanf("%[^\n]", msg);
-	viderBuffer();
-
 	//on selectionne le protocole de transport
 	printf("Quel type de communication souhaitez-vous utiliser ?\n");
 	printf("1 : TCP\n2 : UDP\n");
 	scanf("%i", &choix);
+    viderBuffer();
 
 	//on selectionne le type de communication
 	switch (choix) {
 		case 1:
+            // creation de la socket STREAM (TCP)
 			socket = socStream(adresse, port);
-			envoieMsgStr(socket, msg);
+            // boucle d'interaction avec le serveur
+            while(1) {
+                // nettoyer le buffer msg
+                memset(msg, 0, sizeof msg);
 
-			recepMsgStr(socket);
+                //on recupere le msg a envoyer
+                printf("message a envoyer au serveur :");
+                scanf("%[^\n]", msg);
+                viderBuffer();
 
+                // envoie du message
+                envoieMsgStr(socket, msg);
+                // reception de la reponse du serveur
+                recepMsgStr(socket);
+            }
+            // fermeture de la socket
 			close(socket);
 			break;
 		case 2:
-			//on cree une socket d'envoie DGRAM et envoie le msg
+			//on cree une socket d'envoie DGRAM (UDP)
 			socket = socDgram(adresse, port);
-			envoieMsgDgram(socket, msg);
+            // boucle d'interaction avec le serveur
+            while (1) {
+                // nettoyer le buffer msg
+                memset(msg, 0, sizeof msg);
 
-			recepMsgDgram(socket);
+                //on recupere le msg a envoyer
+                printf("message a envoyer au serveur :");
+                scanf("%[^\n]", msg);
+                viderBuffer();
 
+                // envoie du message au serveur
+                envoieMsgDgram(socket, msg);
+                // reception de la reponse du serveur
+                recepMsgDgram(socket);
+            }
+            // fermeture de la socket
 			close(socket);
 			break;
 	}
-	
 	return 0;
 }
 	

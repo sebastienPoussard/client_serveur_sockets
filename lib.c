@@ -12,6 +12,19 @@
 #include <signal.h>
 #define bufferMAX 1024	// taille max du buffer
 
+// couleurs pour le terminal
+#define RED   "\x1B[31m"
+#define GRN   "\x1B[32m"
+#define YEL   "\x1B[33m"
+#define BLU   "\x1B[34m"
+#define MAG   "\x1B[35m"
+#define CYN   "\x1B[36m"
+#define WHT   "\x1B[37m"
+#define RESET "\x1B[0m"
+
+
+
+
 //Variable Globale
 struct addrinfo *p;	// curseur
 
@@ -35,8 +48,6 @@ int socDgram(char adresse[50], char port[5]) {
 	hints.ai_family = AF_UNSPEC;     // IPv4 ou IPv6
 	hints.ai_socktype = SOCK_DGRAM;  // mode DATAGRAM
 	hints.ai_flags = AI_PASSIVE;     // écoute sur toute les interfaces, remplis automatiquement par mes IP
-
-	printf("DEBUG : construction socket DGRAM\n");
 
 	// passer les parametres à getaddrinfo pour autocomplétion du reste
 	if ((status = getaddrinfo(adresse, port, &hints, &servinfo)) != 0) {
@@ -85,6 +96,7 @@ int socDgram(char adresse[50], char port[5]) {
 int envoieMsgDgram(int soc, char message[bufferMAX]){
 	int numbytes;	// compteur de bits envoyés
 
+    // renvoie du message
 	if ((numbytes = sendto(soc, message, strlen(message), 0, p->ai_addr, p->ai_addrlen)) == -1) {
 		perror("talker: sendto");
 		exit(1);
@@ -99,13 +111,16 @@ int recepMsgDgram(int socEcoute){
 	int tcli;                           	// taille de la structure du client qui envoie des données
 	struct sockaddr_storage addrClient; 	// structure qui contient les informations du client
 
+    // nettoyer le buffer
+    memset(buffer, 0, sizeof buffer);
+    // reception du message
 	printf("En attente de reception d'un message ...\n");
 	if ((tailleDonnees = recvfrom(socEcoute, buffer, bufferMAX-1 , 0,(struct sockaddr *)&addrClient,(socklen_t *)&tcli)) == -1) {
 		perror("recvfrom");
 		exit(1);
 	}
 	printf("Message reçue :");
-	printf("%s\n",buffer);
+	printf(MAG "%s\n" RESET,buffer);
 	return 1;
 }
 
@@ -129,7 +144,6 @@ int socStreamRdv(char port[5]) {
 	hints.ai_socktype = SOCK_STREAM;    // mode STREAM
 	hints.ai_flags = AI_PASSIVE;        // écoute sur toute les interfaces, remplis automatiquement par mes IP
 
-	printf("DEBUG : Construction socket TCP RDV sur %s\n",port);
 	// passer les parametres à getaddrinfo pour autocomplétion du reste
 	if ((status = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
