@@ -6,9 +6,22 @@ int socDgramEcoute(char port[5]) ;
 // les parametres adresse et port permettent de spécifier où envoyer le message
 // le parametre message contient le message à envoyer limité à 1024 caractères
 // la fonction renvoie 0 en cas de succès
-int socDgramEnvoie(char adresse[50], char port[5], char message[1024]); 
+int socDgramEnvoie(char adresse[50], char port[5]); 
 
 // cette fonction crée une socket STREAM (TCP)
 // prend en parametre le port à ouvrir 
 // renvoie le pointeur vers la socket
 int socStreamRdv(char port[5]); 
+
+//Envoie un msg au serveur en mode DGRAM
+int envoieMsgDgram(int soc, char message[1024]);
+
+//Reception d'un msg en mode DGRAM
+int recepMsgDgram(int socEcoute);
+
+// cette fonction crée une socket STREAM (TCP)
+// prend en parametre le port à ouvrir 
+// renvoie le pointeur vers la socket
+int socStreamRdv(char port[5]) ;
+
+

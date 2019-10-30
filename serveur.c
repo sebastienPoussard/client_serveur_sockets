@@ -81,7 +81,7 @@ int main() {
             printf(MAG "%s\n" RESET,buffer);
             // envoyer la reponse au client
             socRep = socDgramEnvoie(ipClient, service);
-	    envoieMsgDgram(socRep, buffer);
+            envoieMsgDgram(socRep, buffer);
             // nettoyer le buffer pour la prochaine reception
             memset(buffer, 0, sizeof buffer);
         }

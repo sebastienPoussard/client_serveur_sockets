@@ -75,7 +75,7 @@ int socDgramEcoute(char port[5]) {
 // les parametres adresse et port permettent de spécifier où envoyer le message
 // le parametre message contient le message à envoyer limité à 1024 caractères
 // la fonction renvoie 0 en cas de succès
-int socDgramEnvoie(char adresse[50], char port[5], char message[1024]) {
+int socDgramEnvoie(char adresse[50], char port[5]) {
 
     // ==================================== VARIABLES ====================================================
     int soc;		        	        // descripteur de socket
@@ -83,7 +83,6 @@ int socDgramEnvoie(char adresse[50], char port[5], char message[1024]) {
     struct addrinfo hints;		        // structure qui contient les informations (ip, port ...) à renseigner
     struct addrinfo *servinfo;          // retour de getaddrinfo (structure completée)
     struct addrinfo *p;		            // curseur
-    int numbytes;                       // compteur de bits envoyés
 
     // ============================= CONSTRUCTION DE LA SOCKET DGRAM =====================================
     // s'assurer que la structure addrinfo à passer est bien vide
