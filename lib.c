@@ -82,7 +82,6 @@ int socDgramEnvoie(char adresse[50], char port[5]) {
     int status;			                // permet de verifier s'il n'y à pas d'erreur
     struct addrinfo hints;		        // structure qui contient les informations (ip, port ...) à renseigner
     struct addrinfo *servinfo;          // retour de getaddrinfo (structure completée)
-    struct addrinfo *p;		            // curseur
 
     // ============================= CONSTRUCTION DE LA SOCKET DGRAM =====================================
     // s'assurer que la structure addrinfo à passer est bien vide
