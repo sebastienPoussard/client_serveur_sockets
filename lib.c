@@ -11,6 +11,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+//Variable Globale
+struct addrinfo *p;   // curseur
 
 // cette fonction créer et renvoie une socket DGRAM en écoute.
 // la socket sera ouverte sur le port spécifié en parametre.
@@ -21,7 +23,6 @@ int socDgramEcoute(char port[5]) {
     int status;			                // permet de verifier s'il n'y à pas d'erreur
     struct addrinfo hints;		        // structure qui contient les informations (ip, port ...) à renseigner
     struct addrinfo *servinfo;          // retour de getaddrinfo (structure completée)
-    struct addrinfo *p;		            // curseur
 
     // ============================= CONSTRUCTION DE LA SOCKET DGRAM =====================================
     // s'assurer que la structure addrinfo à passer est bien vide
@@ -122,14 +123,40 @@ int socDgramEnvoie(char adresse[50], char port[5], char message[1024]) {
         fprintf(stderr, "getaddrinfo n'as pas réussis à renvoyer une structure addrinfo valable pour l'association de la socket\n");
         exit(1);
     }
-        // envoie du message 
-    if ((numbytes = sendto(soc, message, strlen(message), 0, p->ai_addr, p->ai_addrlen)) == -1) {
-        perror("talker: sendto");
-        exit(1);
-    } 
-    return 0;
+     
+    return soc;
 }
 
+//Envoie un msg au serveur en mode DGRAM
+int envoieMsgDgram(int soc, char message[1024]){
+	int numbytes;	// compteur de bits envoyés
+
+        if ((numbytes = sendto(soc, message, strlen(message), 0, p->ai_addr, p->ai_addrlen)) == -1) {
+            perror("talker: sendto");
+            exit(1);
+        }
+	close(soc);
+	return 1;
+}
+
+//Reception d'un msg en mode DGRAM
+int recepMsgDgram(int socEcoute){
+	int tailleDonnees;        		// taille de données reçues
+	int bufferMAX = 500;                	// taille max du buffer
+	char buffer[bufferMAX];             	// buffer permettant de stocker les données
+	int tcli;                           	// taille de la structure du client qui envoie des données
+	struct sockaddr_storage addrClient; 	// structure qui contient les informations du client
+
+	printf("En attente de reception d'un message ...\n");
+	if ((tailleDonnees = recvfrom(socEcoute, buffer, bufferMAX-1 , 0,(struct sockaddr *)&addrClient, &tcli)) == -1) {
+		perror("recvfrom");
+		exit(1);
+	}
+ 	printf("Message reçue :");
+	printf("%s\n",buffer);
+	close(socEcoute);
+	return 1;
+}
 
 // cette fonction crée une socket STREAM (TCP)
 // prend en parametre le port à ouvrir 
@@ -141,7 +168,6 @@ int socStreamRdv(char port[5]) {
     int status;			                // permet de verifier s'il n'y à pas d'erreur
     struct addrinfo hints;		        // structure qui contient les informations (ip, port ...) à renseigner
     struct addrinfo *servinfo;          // retour de getaddrinfo (structure completée)
-    struct addrinfo *p;		            // curseur
     int numbytes;                       // compteur de bits envoyés
 
 

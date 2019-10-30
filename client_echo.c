@@ -43,45 +43,12 @@ int main (){
 	scanf("%[^\n]", msg);
 	viderBuffer();
 
-	socket_envoie = socDgramEnvoie(adresse, port, msg);
+	socket_envoie = socDgramEnvoie(adresse, port);
+	envoieMsgDgram(socket_envoie, msg);
 
-	////reception
-	//memset(&hints, 0, sizeof hints);
-	//hints.ai_family = AF_UNSPEC;
-	//hints.ai_socktype = SOCK_DGRAM;
-
-	//if ((rv = getaddrinfo(adresse, port, &hints, &servinfo)) != 0) {
-	//	fprintf(stderr, "getaddrinfo: %s\n", strerror(rv));
-	//	return 1;
-	//}
-
-	//for(p = servinfo; p != NULL; p = p->ai_next) {
-	//	if ((socket_envoie = socket(p->ai_family, p->ai_socktype,
-	//					p->ai_protocol)) == -1) {
-	//		perror("talker: socket");
-	//		continue;
-	//	}
-
-	//	break;
-	//}
-
-	//if (p == NULL) {
-	//	fprintf(stderr, "talker: failed to create socket\n");
-	//	return 2;
-	//}
-
-	//getnameinfo(&addrServeur, sizeof addrServeur, adresse, sizeof adresse, port, sizeof port, 0);
-
-	//if ((numbytes = recvfrom(socket_ecoute, msg, bufferMAX-1 , 0,
-	//				(struct sockaddr *)&addrServeur, sizeof(addrServeur))) == -1) {
-	//	perror("recvfrom");
-	//	exit(1);
-	//}	
-
-	//freeaddrinfo(servinfo);
-
-	//close(socket_envoie);
-
-
+	//reception
+	socket_ecoute = socDgramEcoute(port);
+	recepMsgDgram(socket_ecoute);
 	return 0;
 }
+	
